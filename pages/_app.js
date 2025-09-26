@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import { useEffect } from 'react';
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Web3ModalProvider } from '../blockchain/config';
 
 function MyApp({ Component, pageProps }) {
@@ -19,6 +20,7 @@ function MyApp({ Component, pageProps }) {
         <Component {...pageProps} />
       </Web3ModalProvider>
       <Analytics />
+      <SpeedInsights />
     </>
   );
 }
