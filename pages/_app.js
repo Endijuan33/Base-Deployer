@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import { useEffect } from 'react';
 import { Analytics } from '@vercel/analytics/react';
+import { Web3ModalProvider } from '../blockchain/config';
 
 function MyApp({ Component, pageProps }) {
   useEffect(() => {
@@ -14,7 +15,9 @@ function MyApp({ Component, pageProps }) {
 
   return (
     <>
-      <Component {...pageProps} />
+      <Web3ModalProvider>
+        <Component {...pageProps} />
+      </Web3ModalProvider>
       <Analytics />
     </>
   );

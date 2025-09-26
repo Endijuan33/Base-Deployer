@@ -1,26 +1,16 @@
 // components/Header.js
-import { useState } from 'react';
-import WalletModal from './WalletModal';
 
 export default function Header({
   walletAddress,
   connectWalletHandler,
   disconnectWallet,
-  connectionMethod,
-  setConnectionMethod,
   isProcessing,
 }) {
-  const [modalOpen, setModalOpen] = useState(false);
 
   const handleConnectClick = () => {
     if (!isProcessing) {
-      setModalOpen(true);
+      connectWalletHandler();
     }
-  };
-
-  const handleWalletSelect = async (walletMethod) => {
-    setModalOpen(false);
-    await connectWalletHandler(walletMethod);
   };
 
   return (
@@ -66,11 +56,6 @@ export default function Header({
           </button>
         )}
       </div>
-      <WalletModal
-        isOpen={modalOpen}
-        onSelect={handleWalletSelect}
-        onClose={() => setModalOpen(false)}
-      />
     </header>
   );
 }

@@ -1,20 +1,23 @@
 // pages/index.js
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
+import { useWeb3Modal, useWeb3ModalProvider, useWeb3ModalAccount, useDisconnect } from '@web3modal/ethers/react';
 import tokenArtifact from '../artifacts/contracts/CustomToken.sol/CustomToken.json';
 import Header from '../components/Header';
 import DeployForm from '../components/DeployForm';
 import { NativeTokenForm, ERC20TokenForm } from '../components/SendForm';
 
 function Home() {
-  const [provider, setProvider] = useState(null);
+  const { open } = useWeb3Modal();
+  const { address, isConnected, chainId } = useWeb3ModalAccount();
+  const { walletProvider } = useWeb3ModalProvider();
+  const { disconnect } = useDisconnect();
+
+  const [ethersProvider, setEthersProvider] = useState(null);
   const [signer, setSigner] = useState(null);
-  const [walletAddress, setWalletAddress] = useState('');
   const [contractAddress, setContractAddress] = useState('');
   const [txStatus, setTxStatus] = useState('');
-
   const [isProcessing, setIsProcessing] = useState(false);
-
   const [deployForm, setDeployForm] = useState({
     name: '',
     symbol: '',
@@ -30,125 +33,30 @@ function Home() {
     amount: ''
   });
 
-  const [connectionMethod, setConnectionMethod] = useState('metamask');
+  const targetChainIdDecimal = 84532;
 
-  const targetChainId = '0x14a34';
-
-  async function ensureCorrectNetwork() {
-    if (!provider) throw new Error("Provider is not initialized.");
-    const network = await provider.getNetwork();
-    if (network.chainId !== 84532) {
-      try {
-        await window.ethereum.request({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId: targetChainId }],
-        });
-      } catch (switchError) {
-        if (switchError.code === 4902) {
-          try {
-            await window.ethereum.request({
-              method: 'wallet_addEthereumChain',
-              params: [{
-                chainId: targetChainId,
-                chainName: 'Base Sepolia',
-                rpcUrls: [process.env.NEXT_PUBLIC_RPC_URL || 'https://sepolia.base.org'],
-                nativeCurrency: { name: 'eth', symbol: 'ETH', decimals: 18 },
-                blockExplorerUrls: [process.env.NEXT_PUBLIC_EXPLORER_URL || 'https://sepolia.basescan.org/'],
-              }],
-            });
-          } catch (addError) {
-            console.error('Failed to add network', addError);
-            throw new Error("Failed to add Base Sepolia.");
-          }
-        } else {
-          console.error('Failed to switch network', switchError);
-          throw new Error("Failed to switch to Base Sepolia.");
-        }
-      }
-    }
-  }
-
-  async function connectMetaMask() {
-    if (typeof window.ethereum !== 'undefined') {
-      try {
-        const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
-        await web3Provider.send("eth_requestAccounts", []);
-        try {
-          await window.ethereum.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: targetChainId }],
-          });
-        } catch (switchError) {
-          if (switchError.code === 4902) {
-            try {
-              await window.ethereum.request({
-                method: 'wallet_addEthereumChain',
-                params: [{
-                  chainId: targetChainId,
-                  chainName: 'Base Sepolia',
-                  rpcUrls: [process.env.NEXT_PUBLIC_RPC_URL || 'https://sepolia.base.org'],
-                  nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
-                  blockExplorerUrls: [process.env.NEXT_PUBLIC_EXPLORER_URL || 'https://sepolia.basescan.org/'],
-                }],
-              });
-            } catch (addError) {
-              console.error('Failed to add network', addError);
-              alert("Failed to add Base Sepolia.");
-              return;
-            }
-          } else {
-            console.error('Failed to switch network', switchError);
-            alert("Failed to switch to Base Sepolia.");
-            return;
-          }
-        }
-        const web3Signer = web3Provider.getSigner();
-        const addr = await web3Signer.getAddress();
-        setProvider(web3Provider);
-        setSigner(web3Signer);
-        setWalletAddress(addr);
-      } catch (error) {
-        console.error(error);
-        alert("Failed to connect wallet.");
-      }
+  useEffect(() => {
+    if (walletProvider) {
+      const provider = new ethers.BrowserProvider(walletProvider);
+      setEthersProvider(provider);
+      provider.getSigner().then(setSigner);
     } else {
-      alert("MetaMask is not installed!");
+      setEthersProvider(null);
+      setSigner(null);
     }
-  }
-
-  async function connectWalletConnect() {
-    try {
-      if (typeof window === 'undefined') return;
-      const WalletConnectProvider = (await import("@walletconnect/web3-provider")).default;
-      const walletConnectProvider = new WalletConnectProvider({
-        rpc: { 84532: process.env.NEXT_PUBLIC_RPC_URL || 'https://sepolia.base.org' },
-        chainId: 84532,
-      });
-      await walletConnectProvider.enable();
-      const web3Provider = new ethers.providers.Web3Provider(walletConnectProvider);
-      const web3Signer = web3Provider.getSigner();
-      const addr = await web3Signer.getAddress();
-      setProvider(web3Provider);
-      setSigner(web3Signer);
-      setWalletAddress(addr);
-    } catch (error) {
-      console.error(error);
-      alert("Failed to connect using WalletConnect.");
-    }
-  }
-
-  async function connectWalletHandler(walletMethod) {
-    if (walletMethod === 'metamask') {
-      await connectMetaMask();
-    } else if (walletMethod === 'walletconnect') {
-      await connectWalletConnect();
-    }
-  }
+  }, [walletProvider]);
+  
+  useEffect(() => {
+      if (!isConnected) {
+          setTxStatus('');
+          setContractAddress('');
+      }
+  }, [isConnected]);
 
   function disconnectWallet() {
-    setProvider(null);
-    setSigner(null);
-    setWalletAddress('');
+    disconnect();
+    setTxStatus('');
+    setContractAddress('');
   }
 
   async function deployContract() {
@@ -160,37 +68,51 @@ function Home() {
       alert("Please fill in the token name, symbol, and total supply.");
       return;
     }
+
+    if (chainId !== targetChainIdDecimal) {
+      alert(`Please switch to the Base Sepolia network in your wallet.`);
+      open({ view: 'Networks' });
+      return;
+    }
+
     try {
       setIsProcessing(true);
-      await ensureCorrectNetwork();
       setTxStatus('Deploying contract...');
+      
       const factory = new ethers.ContractFactory(
         tokenArtifact.abi,
         tokenArtifact.bytecode,
         signer
       );
-      const totalSupplyWei = ethers.utils.parseUnits(deployForm.totalSupply, deployForm.decimals);
+
+      const totalSupplyWei = ethers.parseUnits(deployForm.totalSupply, deployForm.decimals);
       const contract = await factory.deploy(
         deployForm.name,
         deployForm.symbol,
         deployForm.decimals,
         totalSupplyWei
       );
+
+      const deployTx = contract.deploymentTransaction();
+
       setTxStatus(
         <>
           Transaction sent:&nbsp;
-          <a href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/tx/${contract.deployTransaction.hash}`} target="_blank" rel="noopener noreferrer">
-            {contract.deployTransaction.hash.substring(0, 10)}...
+          <a href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/tx/${deployTx.hash}`} target="_blank" rel="noopener noreferrer">
+            {deployTx.hash.substring(0, 10)}...
           </a>
         </>
       );
-      await contract.deployed();
-      setContractAddress(contract.address);
+      
+      await contract.waitForDeployment();
+      const deployedAddress = await contract.getAddress();
+      setContractAddress(deployedAddress);
+
       setTxStatus(
         <>
           Contract deployed at:&nbsp;
-          <a href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/address/${contract.address}`} target="_blank" rel="noopener noreferrer">
-            {contract.address.substring(0, 10)}...
+          <a href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/address/${deployedAddress}`} target="_blank" rel="noopener noreferrer">
+            {deployedAddress.substring(0, 10)}...
           </a>
           <br />
           <strong>Token Name:</strong> {deployForm.name} | <strong>Total Supply:</strong> {deployForm.totalSupply}
@@ -198,7 +120,7 @@ function Home() {
       );
     } catch (error) {
       console.error(error);
-      setTxStatus(`Error: ${error.message}`);
+      setTxStatus(`Error: ${error.reason || error.message}`);
     } finally {
       setIsProcessing(false);
     }
@@ -211,31 +133,29 @@ function Home() {
     }
     try {
       setIsProcessing(true);
-      setTxStatus('Verifying contract...');
-      const totalSupplyWei = ethers.utils.parseUnits(deployForm.totalSupply, deployForm.decimals).toString();
+      setTxStatus('Submitting for verification to Basescan...');
+      
+      const totalSupplyWei = ethers.parseUnits(deployForm.totalSupply, deployForm.decimals).toString();
       const constructorArgs = [
         deployForm.name,
         deployForm.symbol,
-        deployForm.decimals.toString(),
+        deployForm.decimals,
         totalSupplyWei,
       ];
-      const res = await fetch('/api/verify', {
+
+      const res = await fetch('/api/verify-basescan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ contractAddress, constructorArgs }),
       });
+
       const data = await res.json();
-      if (data.error) {
-        let errorMessage = data.error;
-        if (data.error.includes("The address is not a smart contract")) {
-          errorMessage =
-            "Verification failed: No contract found at the provided address. Please wait for propagation or redeploy.";
-        }
-        setTxStatus(`Verification Error: ${errorMessage}`);
+      if (res.status !== 200) {
+        setTxStatus(`Verification Error: ${data.error}`);
       } else {
         setTxStatus(
           <>
-            Verification successful:&nbsp;
+            Verification submitted successfully. GUID: {data.message}. Status will be checked periodically.&nbsp;
             <a href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/address/${contractAddress}#code`} target="_blank" rel="noopener noreferrer">
               View Contract
             </a>
@@ -255,18 +175,26 @@ function Home() {
       alert("Please connect your wallet first.");
       return;
     }
+    if (!nativeForm.recipient || !nativeForm.amount) {
+      alert("Please fill in the recipient address and amount.");
+      return;
+    }
+
+    if (chainId !== targetChainIdDecimal) {
+      alert(`Please switch to the Base Sepolia network in your wallet.`);
+      open({ view: 'Networks' });
+      return;
+    }
+
     try {
       setIsProcessing(true);
-      await ensureCorrectNetwork();
-      if (!nativeForm.recipient || !nativeForm.amount) {
-        alert("Please fill in the recipient address and amount.");
-        return;
-      }
       setTxStatus('Sending native token...');
+      
       const tx = await signer.sendTransaction({
         to: nativeForm.recipient,
-        value: ethers.utils.parseEther(nativeForm.amount)
+        value: ethers.parseEther(nativeForm.amount)
       });
+
       setTxStatus(
         <>
           Transaction sent:&nbsp;
@@ -275,7 +203,9 @@ function Home() {
           </a>
         </>
       );
+      
       await tx.wait();
+      
       setTxStatus(
         <>
           Transaction confirmed:&nbsp;
@@ -286,7 +216,7 @@ function Home() {
       );
     } catch (error) {
       console.error(error);
-      setTxStatus(`Error: ${error.message}`);
+      setTxStatus(`Error: ${error.reason || error.message}`);
     } finally {
       setIsProcessing(false);
     }
@@ -297,17 +227,26 @@ function Home() {
       alert("Please deploy the contract and connect your wallet first.");
       return;
     }
+    if (!ercForm.recipient || !ercForm.amount) {
+      alert("Please fill in the recipient address and amount.");
+      return;
+    }
+
+    if (chainId !== targetChainIdDecimal) {
+      alert(`Please switch to the Base Sepolia network in your wallet.`);
+      open({ view: 'Networks' });
+      return;
+    }
+
     try {
       setIsProcessing(true);
-      await ensureCorrectNetwork();
-      if (!ercForm.recipient || !ercForm.amount) {
-        alert("Please fill in the recipient address and amount.");
-        return;
-      }
       setTxStatus('Sending ERC20 token...');
+      
       const contract = new ethers.Contract(contractAddress, tokenArtifact.abi, signer);
-      const amountUnits = ethers.utils.parseUnits(ercForm.amount, deployForm.decimals);
+      const amountUnits = ethers.parseUnits(ercForm.amount, deployForm.decimals);
+      
       const tx = await contract.sendToken(ercForm.recipient, amountUnits);
+
       setTxStatus(
         <>
           Transaction sent:&nbsp;
@@ -316,7 +255,9 @@ function Home() {
           </a>
         </>
       );
+      
       await tx.wait();
+      
       setTxStatus(
         <>
           Transaction confirmed:&nbsp;
@@ -327,7 +268,7 @@ function Home() {
       );
     } catch (error) {
       console.error(error);
-      setTxStatus(`Error: ${error.message}`);
+       setTxStatus(`Error: ${error.reason || error.message}`);
     } finally {
       setIsProcessing(false);
     }
@@ -336,11 +277,9 @@ function Home() {
   return (
     <div className="card" style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
       <Header
-        walletAddress={walletAddress}
-        connectWalletHandler={connectWalletHandler}
+        walletAddress={address}
+        connectWalletHandler={open}
         disconnectWallet={disconnectWallet}
-        connectionMethod={connectionMethod}
-        setConnectionMethod={setConnectionMethod}
         isProcessing={isProcessing}
       />
 
