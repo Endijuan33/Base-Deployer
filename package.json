@@ -5,36 +5,28 @@
         "scripts": {
                 "dev": "next dev",
                 "dev:turbopack": "next dev --turbopack --hostname localhost",
-                "compile": "npx hardhat compile",
+                "compile": "npx hardhat --config hardhat.config.cjs compile",
                 "build": "npm run compile && next build",
-                "start": "next start"
+                "start": "next start",
+                "lint": "next lint"
         },
         "dependencies": {
                 "@openzeppelin/contracts": "^5.4.0",
-                "@vercel/analytics": "latest",
+                "@vercel/analytics": "^1.5.0",
                 "@vercel/speed-insights": "^1.2.0",
                 "@web3modal/ethers": "^5.1.11",
-                "chalk": "latest",
-                "dotenv": "latest",
-                "ethers": "latest",
-                "express": "latest",
-                "next": "latest",
-                "react": "latest",
-                "react-dom": "latest"
+                "chalk": "^5.6.2",
+                "dotenv": "^17.2.2",
+                "ethers": "^6.15.0",
+                "express": "^5.1.0",
+                "next": "^15.5.4",
+                "react": "^19.1.1",
+                "react-dom": "^19.1.1"
         },
         "devDependencies": {
-                "@nomicfoundation/hardhat-chai-matchers": "latest",
-                "@nomicfoundation/hardhat-ethers": "latest",
-                "@nomicfoundation/hardhat-network-helpers": "latest",
-                "@nomicfoundation/hardhat-toolbox": "latest",
-                "@nomicfoundation/hardhat-verify": "latest",
-                "@typechain/ethers-v6": "latest",
-                "@typechain/hardhat": "latest",
+                "@nomicfoundation/hardhat-toolbox": "^3.0.0",
                 "eslint": "9.36.0",
                 "eslint-config-next": "15.5.4",
-                "hardhat": "latest",
-                "hardhat-gas-reporter": "latest",
-                "solidity-coverage": "latest",
-                "typechain": "latest"
+                "hardhat": "^2.17.2"
         }
 }

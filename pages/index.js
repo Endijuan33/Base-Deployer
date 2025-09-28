@@ -1,22 +1,25 @@
+
 // pages/index.js
 import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
-import { useWeb3Modal, useWeb3ModalProvider, useWeb3ModalAccount, useDisconnect } from '@web3modal/ethers/react';
+// IMPORTANT: We now get the signer from the provider, not a direct hook.
+import { useWeb3Modal, useWeb3ModalAccount, useDisconnect, useWeb3ModalProvider } from '@web3modal/ethers/react';
 import Image from 'next/image';
 import tokenArtifact from '../artifacts/contracts/CustomToken.sol/CustomToken.json';
 import Header from '../components/Header';
 import DeployForm from '../components/DeployForm';
 import { NativeTokenForm, ERC20TokenForm } from '../components/SendForm';
-import History from '../components/History'; // Import the new component
+import History from '../components/History';
 
 function Home() {
   const { open } = useWeb3Modal();
   const { address, isConnected, chainId } = useWeb3ModalAccount();
-  const { walletProvider } = useWeb3ModalProvider();
   const { disconnect } = useDisconnect();
-
-  const [ethersProvider, setEthersProvider] = useState(null);
+  const { walletProvider } = useWeb3ModalProvider();
+  
+  // State for the ethers signer
   const [signer, setSigner] = useState(null);
+
   const [contractAddress, setContractAddress] = useState('');
   const [txStatus, setTxStatus] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -36,14 +39,13 @@ function Home() {
   });
 
   const targetChainIdDecimal = 84532;
-
+  
+  // Effect to create the signer from the wallet provider
   useEffect(() => {
     if (walletProvider) {
       const provider = new ethers.BrowserProvider(walletProvider);
-      setEthersProvider(provider);
       provider.getSigner().then(setSigner);
     } else {
-      setEthersProvider(null);
       setSigner(null);
     }
   }, [walletProvider]);
@@ -63,7 +65,7 @@ function Home() {
 
   async function deployContract() {
     if (!signer) {
-      alert("Please connect your wallet first.");
+      alert("Wallet not connected or signer not available.");
       return;
     }
     if (!deployForm.name || !deployForm.symbol || !deployForm.totalSupply) {
@@ -110,7 +112,6 @@ function Home() {
       const deployedAddress = await contract.getAddress();
       setContractAddress(deployedAddress);
 
-      // Store deployment history in localStorage
       const newDeployment = {
         address: deployedAddress,
         name: deployForm.name,
@@ -120,7 +121,6 @@ function Home() {
       };
       const existingDeployments = JSON.parse(localStorage.getItem('deploymentHistory')) || [];
       localStorage.setItem('deploymentHistory', JSON.stringify([...existingDeployments, newDeployment]));
-
 
       setTxStatus(
         <>
@@ -187,10 +187,9 @@ function Home() {
     }
   }
 
-
   async function sendNativeToken() {
     if (!signer) {
-      alert("Please connect your wallet first.");
+      alert("Wallet not connected or signer not available.");
       return;
     }
     if (!nativeForm.recipient || !nativeForm.amount) {
@@ -263,7 +262,7 @@ function Home() {
       const contract = new ethers.Contract(contractAddress, tokenArtifact.abi, signer);
       const amountUnits = ethers.parseUnits(ercForm.amount, deployForm.decimals);
       
-      const tx = await contract.sendToken(ercForm.recipient, amountUnits);
+      const tx = await contract.transfer(ercForm.recipient, amountUnits); // Corrected function name
 
       setTxStatus(
         <>
