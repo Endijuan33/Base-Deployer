@@ -1,4 +1,5 @@
 // components/Header.js
+import Image from 'next/image';
 
 export default function Header({
   walletAddress,
@@ -25,10 +26,12 @@ export default function Header({
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center' }}>
-        <img
+        <Image
           src="/base-logo.png"
           alt="Base Sepolia Network"
-          style={{ height: '50px', marginRight: '10px' }}
+          width={50}
+          height={50}
+          style={{ marginRight: '10px' }}
         />
         <h1 style={{ margin: 0 }}>Base Sepolia Deployer Tools</h1>
       </div>

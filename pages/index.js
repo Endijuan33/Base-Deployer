@@ -2,10 +2,12 @@
 import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import { useWeb3Modal, useWeb3ModalProvider, useWeb3ModalAccount, useDisconnect } from '@web3modal/ethers/react';
+import Image from 'next/image';
 import tokenArtifact from '../artifacts/contracts/CustomToken.sol/CustomToken.json';
 import Header from '../components/Header';
 import DeployForm from '../components/DeployForm';
 import { NativeTokenForm, ERC20TokenForm } from '../components/SendForm';
+import History from '../components/History'; // Import the new component
 
 function Home() {
   const { open } = useWeb3Modal();
@@ -108,6 +110,18 @@ function Home() {
       const deployedAddress = await contract.getAddress();
       setContractAddress(deployedAddress);
 
+      // Store deployment history in localStorage
+      const newDeployment = {
+        address: deployedAddress,
+        name: deployForm.name,
+        symbol: deployForm.symbol,
+        totalSupply: deployForm.totalSupply,
+        decimals: deployForm.decimals
+      };
+      const existingDeployments = JSON.parse(localStorage.getItem('deploymentHistory')) || [];
+      localStorage.setItem('deploymentHistory', JSON.stringify([...existingDeployments, newDeployment]));
+
+
       setTxStatus(
         <>
           Contract deployed at:&nbsp;
@@ -126,27 +140,30 @@ function Home() {
     }
   }
 
-  async function verifyContract() {
-    if (!contractAddress) {
-      alert("Please deploy the contract first.");
+  async function verifyContract(address, details) {
+    const contractToVerify = address || contractAddress;
+    const formDetails = details || deployForm;
+
+    if (!contractToVerify) {
+      alert("Contract address is not available. Please deploy first or select from history.");
       return;
     }
     try {
       setIsProcessing(true);
-      setTxStatus('Submitting for verification to Basescan...');
+      setTxStatus(`Submitting ${formDetails.name} for verification to Basescan...`);
       
-      const totalSupplyWei = ethers.parseUnits(deployForm.totalSupply, deployForm.decimals).toString();
+      const totalSupplyWei = ethers.parseUnits(formDetails.totalSupply, formDetails.decimals).toString();
       const constructorArgs = [
-        deployForm.name,
-        deployForm.symbol,
-        deployForm.decimals,
+        formDetails.name,
+        formDetails.symbol,
+        formDetails.decimals,
         totalSupplyWei,
       ];
 
       const res = await fetch('/api/verify-basescan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contractAddress, constructorArgs }),
+        body: JSON.stringify({ contractAddress: contractToVerify, constructorArgs }),
       });
 
       const data = await res.json();
@@ -156,7 +173,7 @@ function Home() {
         setTxStatus(
           <>
             Verification submitted successfully. GUID: {data.message}. Status will be checked periodically.&nbsp;
-            <a href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/address/${contractAddress}#code`} target="_blank" rel="noopener noreferrer">
+            <a href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/address/${contractToVerify}#code`} target="_blank" rel="noopener noreferrer">
               View Contract
             </a>
           </>
@@ -169,6 +186,7 @@ function Home() {
       setIsProcessing(false);
     }
   }
+
 
   async function sendNativeToken() {
     if (!signer) {
@@ -292,6 +310,8 @@ function Home() {
         isProcessing={isProcessing}
       />
 
+      <History verifyContract={verifyContract} isProcessing={isProcessing} />
+
       <NativeTokenForm
         nativeForm={nativeForm}
         setNativeForm={setNativeForm}
@@ -315,10 +335,10 @@ function Home() {
         <p>Designed by <strong>Endcore</strong></p>
         <p>
           <a href="https://github.com/Endijuan33" target="_blank" rel="noopener noreferrer" style={{ marginRight: '10px' }}>
-            <img src="/github-icon.png" alt="GitHub" style={{ height: '20px', verticalAlign: 'middle' }} /> GitHub
+            <Image src="/github-icon.png" alt="GitHub" width={20} height={20} style={{ verticalAlign: 'middle' }} /> GitHub
           </a>
           <a href="https://t.me/e0303" target="_blank" rel="noopener noreferrer">
-            <img src="/telegram-icon.png" alt="Telegram" style={{ height: '20px', verticalAlign: 'middle' }} /> Telegram
+            <Image src="/telegram-icon.png" alt="Telegram" width={20} height={20} style={{ verticalAlign: 'middle' }} /> Telegram
           </a>
         </p>
       </footer>

@@ -30,6 +30,8 @@
                 "@nomicfoundation/hardhat-verify": "latest",
                 "@typechain/ethers-v6": "latest",
                 "@typechain/hardhat": "latest",
+                "eslint": "9.36.0",
+                "eslint-config-next": "15.5.4",
                 "hardhat": "latest",
                 "hardhat-gas-reporter": "latest",
                 "solidity-coverage": "latest",
