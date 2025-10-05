@@ -2,11 +2,6 @@ import { useEffect, useState } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 
-const projectId = process.env.NEXT_PUBLIC_PROJECT_ID;
-if (!projectId) {
-  throw new Error("You need to provide NEXT_PUBLIC_PROJECT_ID env variable");
-}
-
 const mainnet = {
   chainId: 1,
   name: 'Ethereum',
@@ -32,36 +27,38 @@ const metadata = {
 
 let modalCreated = false;
 
-async function createModal() {
-  if (modalCreated) {
-    return;
-  }
-  const { createWeb3Modal, defaultConfig } = await import('@web3modal/ethers/react');
-  createWeb3Modal({
-    ethersConfig: defaultConfig({
-      metadata,
-      enableEIP6963: true,
-      enableInjected: true,
-      enableCoinbase: true,
-      rpcUrl: 'https://mainnet.base.org',
-      defaultChainId: 8453,
-    }),
-    chains: [base, mainnet],
-    projectId,
-    enableAnalytics: true
-  });
-  modalCreated = true;
-}
-
 export default function App({ Component, pageProps }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    async function init() {
-      await createModal();
+    async function initModal() {
+      const projectId = process.env.NEXT_PUBLIC_PROJECT_ID;
+      if (!projectId) {
+        console.error("NEXT_PUBLIC_PROJECT_ID env variable is missing!");
+        return;
+      }
+
+      if (!modalCreated) {
+        const { createWeb3Modal, defaultConfig } = await import('@web3modal/ethers/react');
+        createWeb3Modal({
+          ethersConfig: defaultConfig({
+            metadata,
+            enableEIP6963: true,
+            enableInjected: true,
+            enableCoinbase: true,
+            rpcUrl: 'https://mainnet.base.org',
+            defaultChainId: 8453,
+          }),
+          chains: [base, mainnet],
+          projectId,
+          enableAnalytics: true
+        });
+        modalCreated = true;
+      }
       setReady(true);
     }
-    init();
+
+    initModal();
   }, []);
 
   return (

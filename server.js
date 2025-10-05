@@ -16,7 +16,7 @@ app.prepare().then(() => {
 
   printBanner();
 
-  server.all('/*', (req, res) => handle(req, res));
+  server.use(handle);
 
   const useHttps = process.env.USE_HTTPS === 'true';
 
