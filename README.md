@@ -1,4 +1,4 @@
-# Base Sepolia Token Deployer
+# Base Token Deployer
 
 A Next.js web application integrated with Hardhat to deploy, send, and verify a custom ERC-20 token on the Base Sepolia network.
 
@@ -23,8 +23,8 @@ This project combines a Next.js frontend with a Hardhat backend to provide a use
 **1. Clone the Repository**
 
 ```bash
-git clone https://github.com/Endijuan33/Base-Sepolia-Depolyer.git
-cd Base-Sepolia-Depolyer
+git clone https://github.com/Endijuan33/Base-Depolyer.git
+cd Base-Depolyer
 ```
 
 **2. Install Dependencies**
@@ -43,7 +43,6 @@ Create a `.env.local` file in the project's root directory and add the following
 NEXT_PUBLIC_ALCHEMY_API_KEY="YOUR_ALCHEMY_API_KEY"
 NEXT_PUBLIC_PROJECT_ID="YOUR_WALLETCONNECT_PROJECT_ID"
 NEXT_PUBLIC_BASESCAN_API_KEY="YOUR_BASESCAN_API_KEY"
-PRIVATE_KEY="YOUR_WALLET_PRIVATE_KEY"
 ```
 
 - `YOUR_ALCHEMY_API_KEY`: API key from [Alchemy](https://www.alchemy.com/) for Base Sepolia node access.
@@ -91,7 +90,7 @@ npm run start
 
 ## How to Use the Application
 
-1.  **Connect Wallet:** Click the "Connect Wallet" button to connect your MetaMask or WalletConnect wallet. Ensure you are on the Base Sepolia network.
+1.  **Connect Wallet:** Click the "Connect Wallet" button to connect your MetaMask or WalletConnect wallet. Ensure you are on the Base network.
 2.  **Deploy Token:** Use the "Deploy Token" form to create a new ERC-20 token. Fill in the name, symbol, and initial supply, then click "Deploy".
 3.  **Send Tokens:** After the token is successfully deployed, use the "Send Token" form to transfer tokens to another address.
 4.  **Contract Verification:** The verification process on Basescan will run automatically after a successful deployment.
