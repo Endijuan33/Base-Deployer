@@ -5,7 +5,7 @@ import { ethers } from 'ethers';
 // IMPORTANT: We now get the signer from the provider, not a direct hook.
 import { useWeb3Modal, useWeb3ModalAccount, useDisconnect, useWeb3ModalProvider } from '@web3modal/ethers/react';
 import Image from 'next/image';
-import tokenArtifact from '../artifacts/contracts/BaseDeployer.sol/BaseDeployer.json';
+import tokenArtifact from '../artifacts/contracts/BaseBuilder.sol/BaseBuilder.json';
 import Header from '../components/Header';
 import DeployForm from '../components/DeployForm';
 import { NativeTokenForm, ERC20TokenForm } from '../components/SendForm';
