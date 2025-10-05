@@ -1,4 +1,3 @@
-
 // pages/_app.js
 import { createWeb3Modal, defaultConfig } from '@web3modal/ethers/react';
 import { Analytics } from '@vercel/analytics/react';
@@ -19,7 +18,7 @@ const mainnet = {
   rpcUrl: 'https://cloudflare-eth.com'
 };
 
-const baseSepolia = {
+const base = {
     chainId: 8453,
     name: 'Base',
     currency: 'ETH',
