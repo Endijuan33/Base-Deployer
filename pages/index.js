@@ -38,7 +38,7 @@ function Home() {
     amount: ''
   });
 
-  const targetChainIdDecimal = 84532;
+  const targetChainIdDecimal = 8453;
   
   // Effect to create the signer from the wallet provider
   useEffect(() => {

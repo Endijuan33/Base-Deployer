@@ -3,7 +3,7 @@ pragma solidity ^0.8.22;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-contract CustomToken is ERC20 {
+contract BASEBUILDER is ERC20 {
     string private _customName;
     string private _customSymbol;
     uint8 private _customDecimals;

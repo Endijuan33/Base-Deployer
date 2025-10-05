@@ -20,18 +20,18 @@ const mainnet = {
 };
 
 const baseSepolia = {
-    chainId: 84532,
-    name: 'Base Sepolia',
+    chainId: 8453,
+    name: 'Base',
     currency: 'ETH',
-    explorerUrl: 'https://sepolia.basescan.org',
-    rpcUrl: 'https://sepolia.base.org'
+    explorerUrl: 'https://basescan.org',
+    rpcUrl: 'https://mainnet.base.org'
 }
 
 // 3. Create modal
 const metadata = {
   name: 'Base Contract Deployer',
   description: 'Deploy smart contracts on the Base network with ease.',
-  url: 'https://base-sepolia-depolyer.vercel.app', // origin must match your domain & subdomain
+  url: 'https://base-depolyer.vercel.app', // origin must match your domain & subdomain
   icons: ['https://avatars.githubusercontent.com/u/37784886']
 };
 
@@ -41,10 +41,10 @@ createWeb3Modal({
     enableEIP6963: true,
     enableInjected: true,
     enableCoinbase: true,
-    rpcUrl: 'https://sepolia.base.org',
-    defaultChainId: 84532,
+    rpcUrl: 'https://mainnet.base.org',
+    defaultChainId: 8453,
   }),
-  chains: [baseSepolia, mainnet],
+  chains: [base, mainnet],
   projectId,
   enableAnalytics: true
 });

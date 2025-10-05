@@ -4,7 +4,7 @@ import fs from 'fs';
 import path from 'path';
 
 const ETHERSCAN_V2_API_URL = 'https://api.etherscan.io/v2/api';
-const CHAIN_ID = 84532; // Base Sepolia
+const CHAIN_ID = 8453; // Base
 
 // Helper function to find the most complete build info file for a given contract
 const findBuildInfo = (contractName) => {
