@@ -19,13 +19,12 @@ const mainnet = {
 };
 
 const base = {
-    chainId: 8453,
-    name: 'Base',
-    currency: 'ETH',
-    explorerUrl: 'https://basescan.org',
-    rpcUrl: 'https://mainnet.base.org'
-}
-
+  chainId: 8453,
+  name: 'Base',
+  currency: 'ETH',
+  explorerUrl: 'https://basescan.org',
+  rpcUrl: 'https://mainnet.base.org'
+};
 // 3. Create modal
 const metadata = {
   name: 'Base Contract Deployer',
