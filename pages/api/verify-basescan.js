@@ -46,7 +46,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const contractName = 'CustomToken';
+    const contractName = 'BaseBuilder';
 
     // 1. Find the most complete build-info file
     const buildInfo = findBuildInfo(contractName);

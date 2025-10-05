@@ -28,12 +28,12 @@ export default function Header({
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <Image
           src="/base-logo.png"
-          alt="Base Sepolia Network"
+          alt="Base Network"
           width={50}
           height={50}
           style={{ marginRight: '10px' }}
         />
-        <h1 style={{ margin: 0 }}>Base Sepolia Deployer Tools</h1>
+        <h1 style={{ margin: 0 }}>Base Deployer Tools</h1>
       </div>
       <div>
         {walletAddress ? (
