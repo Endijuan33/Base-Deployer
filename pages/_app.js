@@ -32,29 +32,50 @@ export default function App({ Component, pageProps }) {
 
   useEffect(() => {
     async function initModal() {
+      // Only run on client
+      if (typeof window === 'undefined') {
+        setReady(true);
+        return;
+      }
+
       const projectId = process.env.NEXT_PUBLIC_PROJECT_ID;
       if (!projectId) {
         console.error("NEXT_PUBLIC_PROJECT_ID env variable is missing!");
+        setReady(true);
+        return;
+      }
+
+      // Skip if ethereum not available (preview / sandbox)
+      if (!window.ethereum) {
+        console.warn("window.ethereum not found. Web3Modal skipped.");
+        setReady(true);
         return;
       }
 
       if (!modalCreated) {
-        const { createWeb3Modal, defaultConfig } = await import('@web3modal/ethers/react');
-        createWeb3Modal({
-          ethersConfig: defaultConfig({
-            metadata,
-            enableEIP6963: true,
-            enableInjected: true,
-            enableCoinbase: true,
-            rpcUrl: 'https://mainnet.base.org',
-            defaultChainId: 8453,
-          }),
-          chains: [base, mainnet],
-          projectId,
-          enableAnalytics: true
-        });
-        modalCreated = true;
+        try {
+          const { createWeb3Modal, defaultConfig } = await import('@web3modal/ethers/react');
+
+          createWeb3Modal({
+            ethersConfig: defaultConfig({
+              metadata,
+              enableEIP6963: true,
+              enableInjected: true,
+              enableCoinbase: true,
+              rpcUrl: 'https://mainnet.base.org',
+              defaultChainId: 8453,
+            }),
+            chains: [base, mainnet],
+            projectId,
+            enableAnalytics: true
+          });
+
+          modalCreated = true;
+        } catch (e) {
+          console.error("Failed to create Web3Modal:", e);
+        }
       }
+
       setReady(true);
     }
 
