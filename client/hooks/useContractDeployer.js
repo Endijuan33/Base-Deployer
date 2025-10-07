@@ -41,12 +41,21 @@ export function useContractDeployer(signer, chainId, open) {
         signer
       );
 
+      // --- Dynamic Salt Generation ---
+      const signerAddress = await signer.getAddress();
+      const metadata = ethers.solidityPackedKeccak256(
+          ['address', 'uint256'], 
+          [signerAddress, Date.now()]
+      );
+      // -----------------------------
+
       const totalSupplyWei = ethers.parseUnits(deployForm.totalSupply, deployForm.decimals);
       const contract = await factory.deploy(
         deployForm.name,
         deployForm.symbol,
         deployForm.decimals,
-        totalSupplyWei
+        totalSupplyWei,
+        metadata // Add the dynamic salt as the 5th argument
       );
 
       const deployTx = contract.deploymentTransaction();
@@ -63,13 +72,15 @@ export function useContractDeployer(signer, chainId, open) {
       await contract.waitForDeployment();
       const deployedAddress = await contract.getAddress();
       setContractAddress(deployedAddress);
-
+      
+      // Store metadata with the deployment history
       const newDeployment = {
         address: deployedAddress,
         name: deployForm.name,
         symbol: deployForm.symbol,
         totalSupply: deployForm.totalSupply,
-        decimals: deployForm.decimals
+        decimals: deployForm.decimals,
+        metadata: metadata // Store for verification
       };
       const existingDeployments = JSON.parse(localStorage.getItem('deploymentHistory')) || [];
       localStorage.setItem('deploymentHistory', JSON.stringify([...existingDeployments, newDeployment]));

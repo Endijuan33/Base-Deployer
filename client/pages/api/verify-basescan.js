@@ -17,10 +17,7 @@ const findBuildInfo = (contractName) => {
     const contractKey = `${contractFileName}:${contractName}`;
 
     if (buildInfoContent.output.contracts && buildInfoContent.output.contracts[contractFileName] && buildInfoContent.output.contracts[contractFileName][contractName]) {
-        // Found the contract in this build-info file.
-        // Now, we need to make sure the input sources are complete for verification.
         const hasMainContractSource = !!buildInfoContent.input.sources[contractFileName];
-        // A simple heuristic: check if it includes an OpenZeppelin import, common in this project.
         const hasImports = Object.keys(buildInfoContent.input.sources).some(key => key.includes('@openzeppelin'));
 
         if (hasMainContractSource && hasImports) {
@@ -59,7 +56,8 @@ export default async function handler(req, res) {
 
     const abiCoder = ethers.AbiCoder.defaultAbiCoder();
     const encodedConstructorArgs = abiCoder.encode(
-        ['string', 'string', 'uint8', 'uint256'],
+        // Updated types to include the dynamic salt
+        ['string', 'string', 'uint8', 'uint256', 'bytes32'], 
         constructorArgs
     ).slice(2);
 
@@ -72,9 +70,10 @@ export default async function handler(req, res) {
     formData.append('codeformat', 'solidity-standard-json-input');
     formData.append('contractname', `contracts/${contractName}.sol:${contractName}`);
     formData.append('compilerversion', compilerVersion);
-    formData.append('constructorArguments', encodedConstructorArgs); // Corrected spelling
+    formData.append('constructorArguments', encodedConstructorArgs);
 
-    await new Promise(resolve => setTimeout(resolve, 15000));
+    // Increased delay to give Basescan more time to register the contract
+    await new Promise(resolve => setTimeout(resolve, 20000)); 
 
     const response = await axios.post(`${apiUrl}?chainid=${CHAIN_ID}`, formData, {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
@@ -86,7 +85,7 @@ export default async function handler(req, res) {
       const maxChecks = 10;
 
       while (checkCount < maxChecks) {
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        await new Promise(resolve => setTimeout(resolve, 6000)); // Increased polling interval
 
         const checkResponse = await axios.get(apiUrl, {
           params: { chainid: CHAIN_ID, apikey: apiKey, module: 'contract', action: 'checkverifystatus', guid: guid }

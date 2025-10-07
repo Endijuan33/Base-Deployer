@@ -8,6 +8,7 @@ contract BASEBUILDER is ERC20 {
     string private _customSymbol;
     uint8 private _customDecimals;
     address public owner;
+    bytes32 public immutable deploymentMetadata; // Dynamic salt
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Only owner can call this function");
@@ -18,12 +19,14 @@ contract BASEBUILDER is ERC20 {
         string memory name_,
         string memory symbol_,
         uint8 decimals_,
-        uint256 totalSupply_
+        uint256 totalSupply_,
+        bytes32 metadata_ // New salt parameter
     ) ERC20(name_, symbol_) {
         _customName = name_;
         _customSymbol = symbol_;
         _customDecimals = decimals_;
         owner = msg.sender;
+        deploymentMetadata = metadata_; // Set the salt
         _mint(owner, totalSupply_);
     }
 
