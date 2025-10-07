@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "npm run firebase:preview --workspace=client",
+    "dev": "npm run firebase:preview",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
