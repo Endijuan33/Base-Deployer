@@ -23,7 +23,7 @@ function Home() {
     verifyContract, 
     txStatus: verifyStatus, 
     isProcessing: isVerifying 
-  } = useContractVerifier(deployForm, contractAddress);
+  } = useContractVerifier(deployForm, contractAddress, 'BaseBuilder');
   const {
     nativeForm, 
     setNativeForm, 
