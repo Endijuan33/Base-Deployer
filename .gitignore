@@ -2,11 +2,12 @@
 node_modules/
 
 # Build output & cache
+.idx/
+.vscode/
 .next/
 out/
 build/
 dist/
-cache/
 
 # Log files
 *.log
