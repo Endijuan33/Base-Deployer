@@ -45,10 +45,8 @@ NEXT_PUBLIC_PROJECT_ID="YOUR_WALLETCONNECT_PROJECT_ID"
 NEXT_PUBLIC_BASESCAN_API_KEY="YOUR_BASESCAN_API_KEY"
 ```
 
-- `YOUR_ALCHEMY_API_KEY`: API key from [Alchemy](https://www.alchemy.com/) for Base Sepolia node access.
 - `YOUR_WALLETCONNECT_PROJECT_ID`: Project ID from [WalletConnect Cloud](https://cloud.walletconnect.com/).
 - `YOUR_BASESCAN_API_KEY`: API key from [Basescan](https://basescan.org/) for contract verification.
-- `PRIVATE_KEY`: The private key of the wallet you will use for deployment (ensure it has funds on the Base Sepolia network).
 
 **4. Compile the Smart Contract**
 
