@@ -7,6 +7,14 @@ export default function DeployForm({
   verifyContract,
   isProcessing,
 }) {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setDeployForm(prevForm => ({
+      ...prevForm,
+      [name]: name === 'decimals' ? Number(value) : value
+    }));
+  };
+
   return (
     <div style={{ marginBottom: '20px' }}>
       <h2>Deploy Contract (ERC20 Token)</h2>
@@ -22,11 +30,10 @@ export default function DeployForm({
           Token Name:
           <input
             type="text"
+            name="name"
             placeholder="e.g., MyToken"
             value={deployForm.name}
-            onChange={(e) =>
-              setDeployForm({ ...deployForm, name: e.target.value })
-            }
+            onChange={handleChange}
             style={{ padding: '8px', width: '100%' }}
             disabled={isProcessing}
           />
@@ -35,11 +42,10 @@ export default function DeployForm({
           Token Symbol:
           <input
             type="text"
+            name="symbol"
             placeholder="e.g., MTK"
             value={deployForm.symbol}
-            onChange={(e) =>
-              setDeployForm({ ...deployForm, symbol: e.target.value })
-            }
+            onChange={handleChange}
             style={{ padding: '8px', width: '100%' }}
             disabled={isProcessing}
           />
@@ -48,11 +54,10 @@ export default function DeployForm({
           Decimals (default 18):
           <input
             type="number"
+            name="decimals"
             placeholder="Decimals"
             value={deployForm.decimals}
-            onChange={(e) =>
-              setDeployForm({ ...deployForm, decimals: Number(e.target.value) })
-            }
+            onChange={handleChange}
             style={{ padding: '8px', width: '100%' }}
             disabled={isProcessing}
           />
@@ -61,11 +66,10 @@ export default function DeployForm({
           Total Supply:
           <input
             type="text"
+            name="totalSupply"
             placeholder="e.g., 1000000"
             value={deployForm.totalSupply}
-            onChange={(e) =>
-              setDeployForm({ ...deployForm, totalSupply: e.target.value })
-            }
+            onChange={handleChange}
             style={{ padding: '8px', width: '100%' }}
             disabled={isProcessing}
           />
@@ -95,7 +99,7 @@ export default function DeployForm({
             <strong>Total Supply:</strong> {deployForm.totalSupply}
           </p>
           <button
-            onClick={verifyContract}
+            onClick={() => verifyContract()}
             disabled={isProcessing}
             style={{ padding: '10px 20px' }}
           >

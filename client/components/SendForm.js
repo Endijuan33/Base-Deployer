@@ -5,6 +5,11 @@ export function NativeTokenForm({
   sendNativeToken,
   isProcessing,
 }) {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setNativeForm(prevForm => ({ ...prevForm, [name]: value }));
+  };
+
   return (
     <div style={{ marginBottom: '20px' }}>
       <h2>Send Native Token</h2>
@@ -20,11 +25,10 @@ export function NativeTokenForm({
           Recipient Address:
           <input
             type="text"
+            name="recipient"
             placeholder="Recipient Address"
             value={nativeForm.recipient}
-            onChange={(e) =>
-              setNativeForm({ ...nativeForm, recipient: e.target.value })
-            }
+            onChange={handleChange}
             style={{ padding: '8px', width: '100%' }}
             disabled={isProcessing}
           />
@@ -33,11 +37,10 @@ export function NativeTokenForm({
           Amount (in ETH):
           <input
             type="text"
+            name="amount"
             placeholder="Amount (e.g. 0.01, in ETH)"
             value={nativeForm.amount}
-            onChange={(e) =>
-              setNativeForm({ ...nativeForm, amount: e.target.value })
-            }
+            onChange={handleChange}
             style={{ padding: '8px', width: '100%' }}
             disabled={isProcessing}
           />
@@ -61,6 +64,11 @@ export function ERC20TokenForm({
   sendERC20Token,
   isProcessing,
 }) {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setErcForm(prevForm => ({ ...prevForm, [name]: value }));
+  };
+
   return (
     <div style={{ marginBottom: '20px' }}>
       <h2>Send ERC20 Token</h2>
@@ -76,11 +84,10 @@ export function ERC20TokenForm({
           Recipient Address:
           <input
             type="text"
+            name="recipient"
             placeholder="Recipient Address"
             value={ercForm.recipient}
-            onChange={(e) =>
-              setErcForm({ ...ercForm, recipient: e.target.value })
-            }
+            onChange={handleChange}
             style={{ padding: '8px', width: '100%' }}
             disabled={isProcessing}
           />
@@ -89,11 +96,10 @@ export function ERC20TokenForm({
           Amount:
           <input
             type="text"
+            name="amount"
             placeholder="Amount"
             value={ercForm.amount}
-            onChange={(e) =>
-              setErcForm({ ...ercForm, amount: e.target.value })
-            }
+            onChange={handleChange}
             style={{ padding: '8px', width: '100%' }}
             disabled={isProcessing}
           />

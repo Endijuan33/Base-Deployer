@@ -4,21 +4,50 @@ import { useState, useEffect } from 'react';
 export default function History({ verifyContract, isProcessing }) {
   const [history, setHistory] = useState([]);
 
-  useEffect(() => {
+  const updateHistory = () => {
     const storedHistory = localStorage.getItem('deploymentHistory');
-    if (storedHistory) {
-      setHistory(JSON.parse(storedHistory));
-    }
+    setHistory(storedHistory ? JSON.parse(storedHistory) : []);
+  };
+
+  useEffect(() => {
+    updateHistory(); // Initial load
+
+    window.addEventListener('deployment-history-updated', updateHistory);
+
+    return () => {
+      window.removeEventListener('deployment-history-updated', updateHistory);
+    };
   }, []);
 
+  const clearHistory = () => {
+    if (window.confirm("Are you sure you want to clear the deployment history? This action cannot be undone.")) {
+        localStorage.removeItem('deploymentHistory');
+        updateHistory(); // Re-render the component with no history
+    }
+  };
+
   if (history.length === 0) {
-    return null; // Don't render anything if there's no history
+    return (
+        <div style={{ marginTop: '30px' }}>
+            <h2>Deployed Contracts History</h2>
+            <p>No deployment history yet.</p>
+            <hr style={{ marginTop: '20px' }} />
+        </div>
+    );
   }
 
   return (
     <div style={{ marginTop: '30px' }}>
-      <h2>Deployed Contracts History</h2>
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h2>Deployed Contracts History</h2>
+        <button 
+            onClick={clearHistory}
+            style={{ padding: '5px 10px', backgroundColor: '#f44336', color: 'white', border: 'none', borderRadius: '4px' }}
+        >
+            Clear History
+        </button>
+      </div>
+      <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
         <thead>
           <tr>
             <th style={tableHeaderStyle}>Contract Address</th>

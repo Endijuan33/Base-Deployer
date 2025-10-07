@@ -7,11 +7,9 @@ export default function Header({
   disconnectWallet,
   isProcessing,
 }) {
-
-  const handleConnectClick = () => {
-    if (!isProcessing) {
-      connectWalletHandler();
-    }
+  const shortenAddress = (address) => {
+    if (!address) return "";
+    return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
   };
 
   return (
@@ -38,8 +36,8 @@ export default function Header({
       <div>
         {walletAddress ? (
           <>
-            <span style={{ marginRight: '10px', fontWeight: 'bold' }}>
-              {walletAddress}
+            <span style={{ marginRight: '10px', fontWeight: 'bold', fontFamily: 'monospace' }}>
+              {shortenAddress(walletAddress)}
             </span>
             <button
               onClick={disconnectWallet}
@@ -51,7 +49,7 @@ export default function Header({
           </>
         ) : (
           <button
-            onClick={handleConnectClick}
+            onClick={connectWalletHandler}
             disabled={isProcessing}
             style={{ padding: '8px 16px' }}
           >
